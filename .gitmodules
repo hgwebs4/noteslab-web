@@ -1,0 +1,3 @@
+[submodule "noteslab-data-uniffi/noteslab-data"]
+	path = noteslab-data-uniffi/noteslab-data
+	url = https://github.com/hgwebs4/noteslab-data.git

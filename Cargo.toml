@@ -4,11 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ax_println = "0.1"
 axum = "0.7"
 tokio = { version = "1.0", features = ["full"] }
 tower-http = { version = "0.5", features = ["fs", "cors", "compression-gzip"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-# Aapka logic crate
-noteslab-data = { path = "../noteslab-data" }
+diesel = { version = "2.0.0", features = ["sqlite"] }
+
+
+# FIX: Path ab nested folder ko point kar raha hai
+noteslab-data = { path = "./noteslab-data-uniffi/noteslab-data" }
