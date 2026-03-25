@@ -1,0 +1,204 @@
+namespace noteslab {
+    sequence<MarkdownTagRange> parse_markdown(string text);
+};
+
+[Enum]
+interface MarkdownTagRange {
+    Heading(i32 level, i32 start, i32 end);
+    Emphasis(i32 start, i32 end);
+    Strong(i32 start, i32 end);
+    Strikethrough(i32 start, i32 end);
+    InlineCode(i32 start, i32 end);
+    MList(i32 start, i32 end, i32 order, i32 nested_level);
+    ListItem(i32 start, i32 end, i32 nested_level, boolean ordered);
+    Paragraph(i32 start, i32 end);
+    Link(i32 start, i32 end, i32 url_offset);
+    Image(i32 start, i32 end, i32 url_offset);
+    Rule(i32 start, i32 end);
+    BlockQuote(i32 start, i32 end);
+    TaskListMarker(i32 start, i32 end, boolean is_checked);
+    CodeBlock(i32 start, i32 end);
+};
+
+dictionary FFIFolder {
+    string id;
+    string title;
+    i64 created_time;
+    i64 updated_time;
+    i64 user_created_time;
+    i64 user_updated_time;
+    string encryption_cipher_text;
+    boolean encryption_applied;
+    string? parent_id;
+    boolean is_shared;
+    string share_id;
+    string master_key_id;
+    string icon;
+};
+
+dictionary FFINote {
+    string id;
+    string? parent_id;
+    string title;
+    string body;
+    i64 created_time;
+    i64 updated_time;
+    boolean is_conflict;
+    f64 latitude;
+    f64 longitude;
+    f64 altitude;
+    string author;
+    string source_url;
+    boolean is_todo;
+    boolean todo_due;
+    boolean todo_completed;
+    string source;
+    string source_application;
+    string application_data;
+    i64 order;
+    i64 user_created_time;
+    i64 user_updated_time;
+    string encryption_cipher_text;
+    boolean encryption_applied;
+    boolean markup_language;
+    boolean is_shared;
+    string share_id;
+    string? conflict_original_id;
+    string master_key_id;
+};
+
+dictionary FFIAbbrNote {
+    string id;
+    string? parent_id;
+    string title;
+    i64 user_created_time;
+    i64 user_updated_time;
+};
+
+dictionary FFIStatus {
+    i64 note_count;
+    i64 folder_count;
+    i64 resource_count;
+    i64 tag_count;
+    i64 note_tag_count;
+};
+
+dictionary FFISearchNote {
+    string id;
+    string title;
+    string body;
+    sequence<i32> title_highlight_ranges;
+    sequence<i32> body_highlight_ranges;
+};
+
+dictionary FFISyncInfo {
+    i32 delete_remote_count;
+    i32 conflict_note_count;
+    i32 other_conflict_count;
+    i32 upload_count;
+    i32 delete_count;
+    i32 pull_count;
+    f64 elapsed_time;
+};
+
+dictionary FFIResource {
+    string id;
+    string title;
+    string mime;
+    string filename;
+    i64 created_time;
+    i64 updated_time;
+    i64 user_created_time;
+    i64 user_updated_time;
+    string file_extension;
+    string encryption_cipher_text;
+    boolean encryption_applied;
+    boolean encryption_blob_encrypted;
+    i32 size;
+    boolean is_shared;
+    string share_id;
+    string master_key_id;
+};
+
+[Error]
+enum SyncError {
+    "IOError",
+    "FileNotExists",
+    "HandleConflictForDiffNote",
+    "Unknown",
+    "SerializeError",
+    "APIError",
+    "Misconfiguration",
+    "JoinError",
+    "DatabaseError",
+    "DeserializeError",
+    "SerdeJsonError",
+    "SyncConfigNotExists",
+    "NotSupportedSyncTargetInfo",
+};
+
+[Error]
+enum DatabaseError {
+    "Open",
+    "InvalidPath",
+    "Update",
+    "Migration",
+    "Delete",
+    "Select",
+    "Insert",
+    "Options",
+    "Vacuum",
+    "R2d2Error",
+    "Unknown",
+};
+
+[Enum]
+interface SyncConfig {
+    JoplinServer(string host, string email, string password);
+};
+
+interface NoteslabAndroidData {
+    [Throws=SyncError]
+    constructor(string data_dir, string resource_dir, string log_text_file);
+    boolean sync_config_exists();
+    [Throws=SyncError]
+    void save_sync_config(SyncConfig config);
+    [Throws=SyncError]
+    SyncConfig? get_sync_config();
+    [Throws=SyncError]
+    FFISyncInfo synchronize(boolean from_scratch);
+    FFIFolder new_folder(string? parent_id, string title);
+    [Throws=DatabaseError]
+    void replace_folder(FFIFolder folder);
+    [Throws=DatabaseError]
+    sequence<FFIFolder> load_folders();
+    [Throws=DatabaseError]
+    void delete_folder(string id);
+    [Throws=DatabaseError]
+    sequence<FFIAbbrNote> load_abbr_notes(string? parent_id);
+    FFINote new_note(string? parent_id, string title, string body);
+    [Throws=DatabaseError]
+    FFINote load_note(string id);
+    [Throws=DatabaseError]
+    void replace_note(FFINote note);
+    [Throws=DatabaseError]
+    void delete_note(string id);
+    [Throws=DatabaseError]
+    void delete_notes(sequence<string> ids);
+    [Throws=DatabaseError]
+    boolean conflict_note_exists();
+    [Throws=DatabaseError]
+    sequence<FFIAbbrNote> load_abbr_conflict_notes();
+    [Throws=DatabaseError]
+    FFIStatus database_status();
+    [Throws=DatabaseError]
+    sequence<FFISearchNote> search(string search_term);
+    FFIResource create_resource(string title, string mime, string file_extension, i32 size);
+    [Throws=DatabaseError]
+    void save_resource(FFIResource resource);
+    [Throws=DatabaseError]
+    FFIResource load_resource(string id);
+    string parse_markdown_to_preview_html(string text);
+    [Throws=DatabaseError]
+    void prepare_jieba();
+};

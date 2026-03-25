@@ -1,0 +1,31 @@
+[package]
+name = "noteslab-data-uniffi"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0"
+
+[lib]
+crate-type = ["cdylib"]
+name = "uniffi_noteslab"
+
+[dependencies]
+uniffi = { version = "0.25" }
+noteslab-data = { path = "./noteslab-data" }
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
+android_logger = "0.13"
+tokio = { version = "1.28", features = ["full"] }
+log4rs = "1.2"
+pulldown-cmark = { version = "0.9.3", default-features = false }
+
+[build-dependencies]
+uniffi = { version = "0.25", features = ["build", "cli"] }
+camino = "1.1.4"
+
+[profile.release]
+lto = true
+debug = 1
+codegen-units = 1
+
+[patch.crates-io]
+diesel = { git = 'https://github.com/dianQK/diesel.git', tag = "v2.0.4-p1" }
+diesel_migrations = { git = 'https://github.com/dianQK/diesel.git', tag = "v2.0.4-p1" }
